@@ -123,7 +123,16 @@ function pj(r, f) { try { return r ? JSON.parse(r) : f; } catch { return f; } }
 
 // ── Notifications ──
 function requestNotifPermission() { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); }
-function sendNotif(title, body) { if ('Notification' in window && Notification.permission === 'granted') new Notification(title, { body, icon: '✨' }); }
+async function sendNotif(title, body) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    if (reg && reg.showNotification) reg.showNotification(title, { body, icon: 'icons/icon-192.svg' });
+    else new Notification(title, { body, icon: 'icons/icon-192.svg' });
+  } catch (e) {
+    if ('Notification' in window) new Notification(title, { body, icon: 'icons/icon-192.svg' });
+  }
+}
 function checkDeadlineNotifs(tasks) { const today = todayISO(); const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); const tmrw = tomorrow.toISOString().slice(0, 10); tasks.forEach(tk => { if (tk.status === 'done' || tk.trashed) return; if (tk.deadline === today) sendNotif(t('deadline_today'), tk.title); else if (tk.deadline === tmrw) sendNotif(t('deadline_tomorrow'), tk.title); }); }
 
 // ── Ambient Sound (Web Audio API) ──
@@ -674,16 +683,20 @@ checkDeadlineNotifs(tm.tasks);
 
 // ── Live Clock ──
 function updateClock() {
-  const now = new Date();
-  const locale = curLang === 'en' ? 'en-US' : 'id-ID';
-  const timeEl = document.getElementById('clockTime');
-  const dateEl = document.getElementById('clockDate');
-  if (timeEl) timeEl.textContent = now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-  if (dateEl) {
-    const dateStr = now.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    dateEl.textContent = `${dateStr} · ${tz}`;
-  }
+  try {
+    const now = new Date();
+    const locale = curLang === 'en' ? 'en-US' : 'id-ID';
+    const timeEl = document.getElementById('clockTime');
+    const dateEl = document.getElementById('clockDate');
+    if (timeEl) timeEl.textContent = now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    if (dateEl) {
+      const dateStr = now.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      let tz = '';
+      try { tz = typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : ''; } catch (e) { }
+      dateEl.textContent = tz ? `${dateStr} · ${tz}` : dateStr;
+    }
+  } catch (e) { console.error('Clock error:', e); }
 }
 updateClock();
 setInterval(updateClock, 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) updateClock(); });
