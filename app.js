@@ -151,11 +151,32 @@ const ACHIEVEMENTS = [
 ];
 
 // ── PWA ──
+// ── PWA ──
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => { });
 let deferredInstallPrompt = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstallPrompt = e; const btn = document.getElementById('installBtn'); if (btn) btn.style.display = ''; });
-window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; const btn = document.getElementById('installBtn'); if (btn) btn.style.display = 'none'; });
-document.addEventListener('DOMContentLoaded', () => { const btn = document.getElementById('installBtn'); if (btn) btn.addEventListener('click', async () => { if (!deferredInstallPrompt) return; deferredInstallPrompt.prompt(); const { outcome } = await deferredInstallPrompt.userChoice; if (outcome === 'accepted') deferredInstallPrompt = null; }); });
+const installBtn = document.getElementById('installBtn');
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (installBtn) installBtn.style.display = 'inline-flex';
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  if (installBtn) installBtn.style.display = 'none';
+});
+document.addEventListener('DOMContentLoaded', () => {
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        deferredInstallPrompt = null;
+        installBtn.style.display = 'none';
+      }
+    });
+  }
+});
 
 // ═══════════════════════════════════════
 // TaskManager Class
