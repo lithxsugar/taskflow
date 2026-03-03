@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="check" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+  <!-- Subtle glow circle -->
+  <circle cx="256" cy="270" r="140" fill="url(#check)" opacity="0.08"/>
+  <!-- Checkmark -->
+  <path d="M148 270 L228 350 L368 190" fill="none" stroke="url(#check)" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Sparkle top-right -->
+  <g transform="translate(340, 130)">
+    <line x1="0" y1="-22" x2="0" y2="22" stroke="url(#spark)" stroke-width="6" stroke-linecap="round"/>
+    <line x1="-22" y1="0" x2="22" y2="0" stroke="url(#spark)" stroke-width="6" stroke-linecap="round"/>
+    <line x1="-14" y1="-14" x2="14" y2="14" stroke="url(#spark)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="14" y1="-14" x2="-14" y2="14" stroke="url(#spark)" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <!-- Small sparkle bottom-left -->
+  <g transform="translate(155, 170)">
+    <line x1="0" y1="-12" x2="0" y2="12" stroke="url(#spark)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    <line x1="-12" y1="0" x2="12" y2="0" stroke="url(#spark)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  </g>
+</svg>

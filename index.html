@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id" data-lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Smart Task Tracker</title>
+  <meta name="description" content="TaskFlow: Task tracker elegan untuk eksekusi fokus harian." />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#6366f1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="bg-effects">
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+    <div class="bg-orb"></div>
+  </div>
+
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-top">
+        <div class="live-clock" id="liveClock">
+          <div class="clock-time" id="clockTime">--:--:--</div>
+          <div class="clock-date" id="clockDate"></div>
+        </div>
+        <div class="header-actions">
+          <button type="button" id="installBtn" class="icon-btn" title="Install App" style="display:none">📲</button>
+          <button type="button" id="langToggle" class="icon-btn" title="Language">🌐</button>
+          <button type="button" id="notifBtn" class="icon-btn" title="Notifications">🔔</button>
+          <button type="button" id="focusBtn" class="icon-btn" title="Focus Mode">🎯</button>
+          <div class="theme-group">
+            <button type="button" id="themeToggle" class="icon-btn" aria-label="Toggle theme">🌙</button>
+          </div>
+        </div>
+      </div>
+      <h1>✨ TaskFlow</h1>
+      <p data-i18n="subtitle">Eksekusi fokus harian: rapi, cepat, dan selalu on-track.</p>
+      <!-- Streak Badge -->
+      <div class="streak-badge" id="streakBadge" title="Streak hari berturut-turut menyelesaikan task">
+        <span class="streak-fire">🔥</span>
+        <span class="streak-num" id="streakCount">0</span>
+        <span class="streak-label" data-i18n="streak">hari streak</span>
+      </div>
+    </header>
+
+
+
+    <!-- View Toggle -->
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="list" data-i18n="list_view">📋 List</button>
+      <button class="view-btn" data-view="kanban" data-i18n="kanban_view">📊 Board</button>
+      <button class="view-btn" data-view="dashboard" data-i18n="dashboard_view">📈 Dashboard</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats" id="statsBar">
+      <button type="button" class="stat-card active" data-filter="all">
+        <div class="stat-num" id="totalTasks">0</div>
+        <div class="stat-label" data-i18n="total">Total</div>
+        <div class="stat-progress">
+          <div class="stat-progress-fill" style="width:100%"></div>
+        </div>
+      </button>
+      <button type="button" class="stat-card" data-filter="pending">
+        <div class="stat-num" id="pendingTasks">0</div>
+        <div class="stat-label">Pending</div>
+        <div class="stat-progress">
+          <div class="stat-progress-fill" style="width:0%"></div>
+        </div>
+      </button>
+      <button type="button" class="stat-card" data-filter="in-progress">
+        <div class="stat-num" id="inProgressTasks">0</div>
+        <div class="stat-label" data-i18n="in_progress">Dikerjakan</div>
+        <div class="stat-progress">
+          <div class="stat-progress-fill" style="width:0%"></div>
+        </div>
+      </button>
+      <button type="button" class="stat-card" data-filter="done">
+        <div class="stat-num" id="completedTasks">0</div>
+        <div class="stat-label" data-i18n="done">Selesai</div>
+        <div class="stat-progress">
+          <div class="stat-progress-fill" style="width:0%"></div>
+        </div>
+      </button>
+    </div>
+
+    <!-- ═══ LIST VIEW ═══ -->
+    <div id="listView">
+      <!-- Add Task Form -->
+      <div class="panel">
+        <div class="form-header">
+          <h3 data-i18n="add_task">➕ Tambah Tugas Baru</h3>
+          <button type="button" class="icon-btn form-toggle" id="formToggle">▼</button>
+        </div>
+        <div class="form-grid" id="formGrid">
+          <div class="form-group full"><label for="taskTitle" data-i18n="task_name">Nama Tugas</label><input
+              id="taskTitle" class="input" data-i18n-ph="ph_task" placeholder="Apa yang ingin Anda kerjakan?" /></div>
+          <div class="form-group"><label for="taskCategory" data-i18n="category">Kategori</label><select
+              id="taskCategory" class="input">
+              <option value="work">💼 Work</option>
+              <option value="personal">👤 Personal</option>
+              <option value="study">📚 Study</option>
+              <option value="health">💪 Health</option>
+              <option value="finance">💰 Finance</option>
+              <option value="other">📌 Other</option>
+            </select></div>
+          <div class="form-group"><label for="taskPriority" data-i18n="priority">Prioritas</label><select
+              id="taskPriority" class="input">
+              <option value="low">🟢 Low</option>
+              <option selected value="medium">🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select></div>
+          <div class="form-group"><label for="taskDeadline">Deadline</label><input type="date" id="taskDeadline"
+              class="input" /></div>
+          <div class="form-group"><label for="taskStatus">Status</label><select id="taskStatus" class="input">
+              <option selected value="pending">⏳ Pending</option>
+              <option value="in-progress">🚀 In Progress</option>
+              <option value="done">✅ Done</option>
+            </select></div>
+          <div class="form-group"><label data-i18n="recurring">Berulang</label><select id="taskRecurring" class="input">
+              <option value="none" data-i18n="rec_none">Tidak</option>
+              <option value="daily" data-i18n="rec_daily">Harian</option>
+              <option value="weekly" data-i18n="rec_weekly">Mingguan</option>
+              <option value="monthly" data-i18n="rec_monthly">Bulanan</option>
+            </select></div>
+          <div class="form-group"><label data-i18n="link">Link / Lampiran</label><input id="taskLink" class="input"
+              placeholder="https://..." /></div>
+          <div class="form-group full"><label data-i18n="description">Deskripsi</label><input id="taskDesc"
+              class="input" data-i18n-ph="ph_desc" placeholder="Catatan singkat..." /></div>
+          <div class="form-group full"><button id="addTaskBtn" type="button" class="btn btn-primary btn-full"
+              data-i18n="add_btn">✨ Tambah Tugas</button></div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-box"><span class="search-icon">🔍</span><input id="searchInput" class="input"
+            data-i18n-ph="ph_search" placeholder="Cari tugas..." /></div>
+        <div class="sort-group">
+          <button type="button" class="sort-btn active" data-sort="newest" data-i18n="newest">Terbaru</button>
+          <button type="button" class="sort-btn" data-sort="deadline">Deadline</button>
+          <button type="button" class="sort-btn" data-sort="priority" data-i18n="priority_sort">Prioritas</button>
+          <button type="button" class="sort-btn" data-sort="category" data-i18n="category_sort">Kategori</button>
+        </div>
+        <!-- Advanced Filter -->
+        <button type="button" class="sort-btn" id="advFilterToggle">🔽 Filter</button>
+        <div class="transfer-tools">
+          <span class="transfer-label">💾</span>
+          <button type="button" class="transfer-btn" id="exportDataBtn">⬇ Export</button>
+          <button type="button" class="transfer-btn" id="importDataBtn">⬆ Import</button>
+          <input type="file" id="importFileInput" accept="application/json" style="display:none" />
+        </div>
+        <div id="savingIndicator" class="save-indicator"><span class="spinner"></span><span
+            id="savingLabel">Menyimpan...</span></div>
+      </div>
+
+      <!-- Advanced Filter Panel -->
+      <div class="adv-filter-panel" id="advFilterPanel" style="display:none">
+        <div class="form-grid" style="gap:8px">
+          <div class="form-group"><label>Kategori</label><select id="filterCategory" class="input">
+              <option value="">Semua</option>
+              <option value="work">💼 Work</option>
+              <option value="personal">👤 Personal</option>
+              <option value="study">📚 Study</option>
+              <option value="health">💪 Health</option>
+              <option value="finance">💰 Finance</option>
+              <option value="other">📌 Other</option>
+            </select></div>
+          <div class="form-group"><label>Prioritas</label><select id="filterPriority" class="input">
+              <option value="">Semua</option>
+              <option value="high">🔴 High</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="low">🟢 Low</option>
+            </select></div>
+          <div class="form-group"><label>Dari Tanggal</label><input type="date" id="filterDateFrom" class="input" />
+          </div>
+          <div class="form-group"><label>Sampai Tanggal</label><input type="date" id="filterDateTo" class="input" />
+          </div>
+          <div class="form-group"><label>Tampilkan</label><select id="filterShow" class="input">
+              <option value="active">Aktif</option>
+              <option value="trash">🗑 Trash</option>
+              <option value="all">Semua</option>
+            </select></div>
+          <div class="form-group"><button class="btn btn-secondary btn-sm btn-full" id="clearFiltersBtn">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Task List -->
+      <div id="taskList" class="task-list"></div>
+      <div id="bulkBar" class="bulk-bar">
+        <div class="bulk-left"><label><input type="checkbox" id="selectPageCheckbox" /> Pilih semua</label><span
+            class="bulk-count" id="bulkCount">0</span></div>
+        <div class="bulk-actions">
+          <button type="button" class="btn btn-secondary btn-sm" id="bulkClearBtn"
+            data-i18n="bulk_cancel">Batal</button>
+          <button type="button" class="btn btn-danger btn-sm" id="bulkDeleteBtn" data-i18n="bulk_delete">🗑
+            Hapus</button>
+        </div>
+      </div>
+      <div id="pagination" class="pagination" style="display:none"></div>
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon">📝</div>
+        <h3 data-i18n="empty_title">Belum ada tugas</h3>
+        <p data-i18n="empty_desc">Tambahkan tugas pertama Anda!</p>
+      </div>
+
+      <!-- Statistics -->
+      <section class="panel chart-section">
+        <h3 data-i18n="stats_title">📊 Statistik</h3>
+        <div class="stats-layout">
+          <!-- Donut Chart -->
+          <div class="stats-donut-side">
+            <div class="donut-chart" id="donutChart">
+              <svg viewBox="0 0 100 100">
+                <circle class="donut-bg" cx="50" cy="50" r="40" stroke="var(--bg3)" stroke-width="18" fill="none" />
+                <circle id="donutDone" cx="50" cy="50" r="40" stroke="var(--ok)" stroke-width="18" fill="none"
+                  stroke-dasharray="0 251.33" stroke-linecap="round" />
+                <circle id="donutProgress" cx="50" cy="50" r="40" stroke="var(--i)" stroke-width="18" fill="none"
+                  stroke-dasharray="0 251.33" stroke-linecap="round" />
+                <circle id="donutPending" cx="50" cy="50" r="40" stroke="var(--w)" stroke-width="18" fill="none"
+                  stroke-dasharray="0 251.33" stroke-linecap="round" />
+              </svg>
+              <div class="donut-center">
+                <div class="donut-num" id="donutPercent">0%</div>
+                <div class="donut-label" data-i18n="completed">Selesai</div>
+              </div>
+            </div>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="legend-dot" style="background:var(--ok)"></span> <span
+                  data-i18n="done">Selesai</span></span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--i)"></span> <span
+                  data-i18n="in_progress">Dikerjakan</span></span>
+              <span class="legend-item"><span class="legend-dot" style="background:var(--w)"></span> Pending</span>
+            </div>
+          </div>
+          <!-- Insight Cards -->
+          <div class="stats-insights">
+            <div class="insight-card">
+              <div class="insight-icon">⚡</div>
+              <div class="insight-info">
+                <div class="insight-label" data-i18n="ins_rate">Completion Rate</div>
+                <div class="insight-value" id="insightRate">—</div>
+                <div class="insight-sub" id="insightRateSub"></div>
+              </div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-icon">⏱</div>
+              <div class="insight-info">
+                <div class="insight-label" data-i18n="ins_avg">Avg. Completion Time</div>
+                <div class="insight-value" id="insightAvg">—</div>
+                <div class="insight-sub" id="insightAvgSub"></div>
+              </div>
+            </div>
+            <div class="insight-card">
+              <div class="insight-icon">🏆</div>
+              <div class="insight-info">
+                <div class="insight-label" data-i18n="ins_day">Most Productive Day</div>
+                <div class="insight-value" id="insightDay">—</div>
+                <div class="insight-sub" id="insightDaySub"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Calendar -->
+      <section class="panel calendar-panel">
+        <div class="calendar-top">
+          <h3 data-i18n="calendar_title">📅 Kalender Deadline</h3>
+          <div class="calendar-nav">
+            <button type="button" class="sort-btn" id="calPrev">◀</button>
+            <div id="calendarTitle" class="calendar-title"></div>
+            <button type="button" class="sort-btn" id="calNext">▶</button>
+          </div>
+        </div>
+        <div id="calendarGrid" class="calendar-grid"></div>
+        <div class="due-box">
+          <h4 data-i18n="deadline_7">🔔 Deadline 7 Hari</h4>
+          <div id="dueList"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ═══ BOARD VIEW ═══ -->
+    <div id="kanbanView" style="display:none">
+      <div class="kanban-board">
+        <div class="kanban-col" data-status="pending">
+          <div class="kanban-col-header pending-header"><span>⏳</span>
+            <h3 data-i18n="pending_col">Pending</h3><span class="kanban-count" id="kanbanPending">0</span>
+          </div>
+          <div class="kanban-items" id="kanbanPendingList" data-status="pending"></div>
+        </div>
+        <div class="kanban-col" data-status="in-progress">
+          <div class="kanban-col-header progress-header"><span>🚀</span>
+            <h3 data-i18n="progress_col">In Progress</h3><span class="kanban-count" id="kanbanProgress">0</span>
+          </div>
+          <div class="kanban-items" id="kanbanProgressList" data-status="in-progress"></div>
+        </div>
+        <div class="kanban-col" data-status="done">
+          <div class="kanban-col-header done-header"><span>✅</span>
+            <h3 data-i18n="done_col">Done</h3><span class="kanban-count" id="kanbanDone">0</span>
+          </div>
+          <div class="kanban-items" id="kanbanDoneList" data-status="done"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DASHBOARD VIEW ═══ -->
+    <div id="dashboardView" style="display:none">
+      <div class="dashboard-grid">
+        <!-- Weekly Report -->
+        <div class="panel dash-card">
+          <h3 data-i18n="weekly_report">📋 Laporan Minggu Ini</h3>
+          <div class="weekly-stats" id="weeklyStats">
+            <div class="ws-item">
+              <div class="ws-num" id="weekCompleted">0</div>
+              <div class="ws-label" data-i18n="completed_this_week">Selesai</div>
+            </div>
+            <div class="ws-item">
+              <div class="ws-num" id="weekAdded">0</div>
+              <div class="ws-label" data-i18n="added_this_week">Ditambah</div>
+            </div>
+            <div class="ws-item">
+              <div class="ws-num" id="weekFocus">0</div>
+              <div class="ws-label" data-i18n="focus_min">Mnt Fokus</div>
+            </div>
+            <div class="ws-item">
+              <div class="ws-num" id="weekStreak">0</div>
+              <div class="ws-label">Streak 🔥</div>
+            </div>
+          </div>
+        </div>
+        <!-- Heatmap -->
+        <div class="panel dash-card">
+          <h3 data-i18n="activity_30">📅 Aktivitas 30 Hari</h3>
+          <div class="heatmap" id="heatmap"></div>
+          <div class="heatmap-legend"><span data-i18n="hm_less">Kurang</span>
+            <div class="heatmap-scale"><span class="hm-0"></span><span class="hm-1"></span><span
+                class="hm-2"></span><span class="hm-3"></span><span class="hm-4"></span></div><span
+              data-i18n="hm_more">Banyak</span>
+          </div>
+        </div>
+        <!-- Achievements -->
+        <div class="panel dash-card">
+          <h3 data-i18n="achievements">🏆 Pencapaian</h3>
+          <div class="achievements" id="achievementsList"></div>
+        </div>
+        <!-- Category Breakdown -->
+        <div class="panel dash-card">
+          <h3 data-i18n="by_category">📊 Per Kategori</h3>
+          <div class="cat-breakdown" id="catBreakdown"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Delete Modal -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-box">
+      <h3>🗑️ Hapus Tugas</h3>
+      <p>Pindahkan "<strong id="deleteTaskTitle"></strong>" ke trash?</p>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-action="close-modal">Batal</button>
+        <button type="button" class="btn btn-danger" data-action="confirm-delete">Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Focus Mode -->
+  <div id="focusOverlay" class="focus-overlay">
+    <div class="focus-box">
+      <div class="focus-label">🎯 Focus Mode</div>
+      <div class="focus-ring">
+        <svg viewBox="0 0 100 100">
+          <circle class="ring-bg" cx="50" cy="50" r="45" />
+          <circle class="ring-fill" id="focusRing" cx="50" cy="50" r="45" stroke-dasharray="282.74"
+            stroke-dashoffset="0" />
+        </svg>
+        <div class="ring-time" id="focusTime">25:00</div>
+      </div>
+      <div class="focus-task-picker">
+        <label data-i18n="focus_pick" style="font-size:.9rem;color:var(--tm);margin-bottom:6px;display:block">🎯 Pilih
+          tugas untuk difokuskan</label>
+        <select id="focusTaskSelect" class="input"
+          style="max-width:320px;padding:8px 12px;font-size:.9rem;margin:0 auto;display:block"></select>
+      </div>
+      <div class="focus-controls">
+        <button type="button" class="btn btn-primary" id="focusStartBtn">▶ Mulai</button>
+        <button type="button" class="btn btn-secondary" id="focusPauseBtn" style="display:none">⏸ Pause</button>
+        <button type="button" class="btn btn-secondary" id="focusResetBtn">🔄 Reset</button>
+        <button type="button" class="btn btn-secondary" id="focusCloseBtn">✕ Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confettiContainer" class="confetti-container"></div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
